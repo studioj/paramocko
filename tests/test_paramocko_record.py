@@ -13,12 +13,28 @@ class TestSSHClientRecord(unittest.TestCase):
     def test_exec_command_stores_its_calls_in_a_dict(self):
         paramocko_client = SSHClient()
         paramocko_client._transport = MagicMock()
+        paramocko_client.start_recording()
         paramocko_client.exec_command("ls")
-        self.assertEquals(paramocko_client.exec_command_calls, [("ls", -1, None, False, None)])
+        self.assertEqual(paramocko_client.exec_command_calls, [("ls", -1, None, False, None)])
+
+    def test_exec_command_doesnt_stores_its_calls_in_a_dict_when_not_recording(self):
+        paramocko_client = SSHClient()
+        paramocko_client._transport = MagicMock()
+        paramocko_client.exec_command("ls")
+        self.assertEqual(paramocko_client.exec_command_calls, [])
+
+    def test_exec_command_doesnt_stores_its_calls_in_a_dict_when_stopped_recording(self):
+        paramocko_client = SSHClient()
+        paramocko_client._transport = MagicMock()
+        paramocko_client.start_recording()
+        paramocko_client.exec_command("ls")
+        paramocko_client.stop_recording()
+        paramocko_client.exec_command("ls")
+        self.assertEqual(paramocko_client.exec_command_calls, [("ls", -1, None, False, None)])
 
     def test_exec_command_stills_returns_a_tuple_of_three(self):
         paramocko_client = SSHClient()
         paramocko_client._transport = MagicMock()
         ret_val = paramocko_client.exec_command("ls")
         self.assertIsInstance(ret_val, tuple)
-        self.assertEquals(3, len(ret_val))
+        self.assertEqual(3, len(ret_val))
